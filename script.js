@@ -1,20 +1,14 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-ctx.beginPath();
-ctx.rect(20, 40, 50, 50);
-ctx.fillStyle = "#FF0000";
-ctx.fill();
-ctx.closePath();
-
-ctx.beginPath();
-ctx.arc(240, 160, 20, 0, Math.PI*2, false);
-ctx.fillStyle = "green";
-ctx.fill();
-ctx.closePath();
-
-ctx.beginPath();
-ctx.rect(160, 10, 100, 40);
-ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
-ctx.stroke();
-ctx.closePath();
+const Tetriminos = [
+// [[row,column],[...],[...],[...]]
+    [[0,0],[0,0],[0,0],[0,0]],  //EMPTY
+    [[1,0],[1,1],[1,2],[1,3]],  //TETRIS
+    [[0,0],[0,1],[1,0],[1,1]],  //SQUARE
+    [[0,0],[0,1],[1,1],[1,2]],  //KEY1
+    [[0,2],[0,1],[1,1],[1,0]],  //KEY2
+    [[0,0],[0,1],[0,2],[1,0]],  //L1
+    [[0,0],[0,1],[0,2],[1,2]],  //L2
+    [[0,0],[0,1],[0,2],[1,1]],  //T
+];
