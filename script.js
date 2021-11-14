@@ -1,6 +1,15 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
+const EMPTY = 0;
+const TETRIS = 1;
+const SQUARE = 2;
+const KEY1 = 3;
+const KEY2 = 4;
+const L1 = 5;
+const L2 = 6;
+const T = 7;
+
 const Tetriminos = [
 // [[row,column],[...],[...],[...]]
     [[0,0],[0,0],[0,0],[0,0]],  //EMPTY
@@ -15,6 +24,12 @@ const Tetriminos = [
 
 ROW = 10;
 COLUMN = 6;
+
+
+//BlockInfoの設定
+let BlockInfo = new Object();
+BlockInfo.type = 0;
+BlockInfo.addr = Tetriminos[EMPTY];
 
 //field setting
 let field = (new Array(ROW + 6)).fill(0);
