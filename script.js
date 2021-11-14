@@ -52,12 +52,26 @@ BlockInfo.type = type;
 BlockInfo.addr = Tetriminos[type];
 
 for (let i = 0; i < 4; i++) {
-    let row = BlockInfo.addr[i][0] + 2;
-    let column = BlockInfo.addr[i][1] + 4;
-    field[row][column] = BlockInfo.type;
+    BlockInfo.addr[i][0] += 2;
+    BlockInfo.addr[i][1] += 4;
+    console.log(BlockInfo.addr[i][0], BlockInfo.addr[i][1]);
 }
 
+let count = 0;
+const countUp = () => {
+    console.log(count++);
+    const timeoutId = setTimeout(countUp, 1000);
+    
+    for (let i = 0; i < 4; i++) {
+        BlockInfo.addr[i][0] += 1;
+    }
+   
+    for (let i = 0; i < 4; i++) {
+        console.log(BlockInfo.addr[i])
+    }
 
-for (let i = 0; i < ROW + 6; i++)   {
-    console.log(field[i]);
+    if(count > 8){　
+        clearTimeout(timeoutId);
+    }
 }
+countUp();
