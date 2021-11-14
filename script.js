@@ -32,7 +32,7 @@ BlockInfo.addr = Tetriminos[EMPTY];
 
 //field setting
 let field = (new Array(ROW + 6)).fill(0);
-field.forEach((_, i) => {field[i] = (new Array(COLUMN+4)).fill(0);});
+field.forEach((_, i) => {field[i] = (new Array(COLUMN + 4)).fill(0);});
 
 for(let i = 2; i < COLUMN + 2; i++)    {
     field[0][i] = 9;
@@ -54,24 +54,42 @@ BlockInfo.addr = Tetriminos[type];
 for (let i = 0; i < 4; i++) {
     BlockInfo.addr[i][0] += 2;
     BlockInfo.addr[i][1] += 4;
-    console.log(BlockInfo.addr[i][0], BlockInfo.addr[i][1]);
 }
+
+dump();
 
 let count = 0;
 const countUp = () => {
-    console.log(count++);
+    count++;
     const timeoutId = setTimeout(countUp, 1000);
     
     for (let i = 0; i < 4; i++) {
         BlockInfo.addr[i][0] += 1;
     }
    
-    for (let i = 0; i < 4; i++) {
-        console.log(BlockInfo.addr[i])
-    }
+    dump();
 
-    if(count > 8){　
+    if(count > 7){　
         clearTimeout(timeoutId);
     }
 }
 countUp();
+
+function dump()    {
+    let row, column;
+    let debug = (new Array(ROW)).fill(0);
+    debug.forEach((_, i) => {debug[i] = (new Array(COLUMN)).fill(0);});
+
+    for (let i = 0; i < 4; i++) {
+        row = BlockInfo.addr[i][0] - 2;
+        column = BlockInfo.addr[i][1] - 2;
+        debug[row][column] = BlockInfo.type;
+    }
+
+    for (let i = 0; i < ROW; i++)   {
+        console.log(debug[i])
+    }
+
+    console.log("");
+
+}
