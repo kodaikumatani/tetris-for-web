@@ -25,7 +25,6 @@ const Tetriminos = [
 ROW = 10;
 COLUMN = 6;
 
-
 //BlockInfoの設定
 let BlockInfo = new Object();
 BlockInfo.type = 0;
@@ -47,6 +46,17 @@ for(let i = 0; i < ROW + 6; i++)    {
     field[i][COLUMN + 2] = 9;
     field[i][COLUMN + 3] = 9;
 }
+
+type = SQUARE;
+BlockInfo.type = type;
+BlockInfo.addr = Tetriminos[type];
+
+for (let i = 0; i < 4; i++) {
+    let row = BlockInfo.addr[i][0] + 2;
+    let column = BlockInfo.addr[i][1] + 4;
+    field[row][column] = BlockInfo.type;
+}
+
 
 for (let i = 0; i < ROW + 6; i++)   {
     console.log(field[i]);
