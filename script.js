@@ -22,7 +22,7 @@ const Tetriminos = [
     [[0,0],[0,1],[0,2],[1,1]],  //T
 ];
 
-const ROW = 20;
+const ROW = 10;
 const COLUMN = 6;
 
 const row_shift = 1;
@@ -30,6 +30,8 @@ const row_shift = 1;
 let randoms = [];
 let min = 1;
 let max = 7;
+
+let sw_power = true;
 
 let shift = Math.ceil(COLUMN/2) + 1;
 
@@ -48,6 +50,8 @@ let count = 0;
 const countUp = () => {
     count++;
     const timeoutId = setTimeout(countUp, 1000);
+
+    document.addEventListener('keydown', keyevent);
     
     drop_block();
 
@@ -67,6 +71,25 @@ function　shuffle() {
                 randoms.push(tmp);
                 break;
             }
+        }
+    }
+}
+
+function keyevent(e) {
+    if (sw_power) {
+        switch (e.key) {
+            case 'ArrowUp':
+                //console.log('↑');
+                break;
+            case 'ArrowDown':
+                //console.log('↓');
+                break;
+            case 'ArrowLeft':
+                //console.log('←');
+                break;
+            case 'ArrowRight':
+                //console.log('→');
+                break;
         }
     }
 }
