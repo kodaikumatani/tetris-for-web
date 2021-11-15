@@ -10,6 +10,11 @@ const L1 = 5;
 const L2 = 6;
 const T = 7;
 
+const ROW = 20;
+const COLUMN = 10;
+
+const dump_on = true;
+
 const Tetriminos = [
 // [[row,column],[...],[...],[...]]
     [[0,0],[0,0],[0,0],[0,0]],  //EMPTY
@@ -22,18 +27,14 @@ const Tetriminos = [
     [[0,0],[0,1],[0,2],[1,1]],  //T
 ];
 
-const ROW = 10;
-const COLUMN = 6;
-
-const row_shift = 1;
 
 let randoms = [];
-let min = 1;
-let max = 7;
+let end = Tetriminos.length;
 
 let sw_power = true;
 
-let shift = Math.ceil(COLUMN/2) + 1;
+const row_shift = 1;
+const column_shift = Math.ceil(COLUMN/2) + 1;
 
 //BlockInfoの設定
 let BlockInfo = new Object();
@@ -64,9 +65,9 @@ countUp();
 function　shuffle() {
     //ブロックの順番を決める
     randoms = [];
-    for(i = 1; i <= 7; i++){
+    for(i = 1; i < end; i++){
         while(true){
-            var tmp = Math.floor( Math.random() * (max - min + 1)) + min;
+            var tmp = Math.floor(Math.random() * (end - 1)) + 1;
             if(!randoms.includes(tmp)){
                 randoms.push(tmp);
                 break;
@@ -92,6 +93,14 @@ function keyevent(e) {
                 //console.log('→');
                 move_right();
                 break;
+            case 'x':
+                //console.log('x');
+                rotate_clockwise();
+                break;
+            case 'z':
+                //console.log('z);
+                rotate_counter_clockwise();
+                break
         }
     }
 }
@@ -118,13 +127,10 @@ function setting()  {
 
     //最初のブロックを保存
     for (let i = 0; i < 4; i++) {
-        BlockInfo.addr[i][0] = Tetriminos[BlockInfo.type][i][0];
-        if (BlockInfo.type == 1)    {
-            BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1]+shift - 1;
-        } else {
-            BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1]+shift;
-        }
+        BlockInfo.addr[i][0] = Tetriminos[BlockInfo.type][i][0] + row_shift;
+        BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1] + column_shift;
     }
+    dump()
 }
 
 function new_block()   {
@@ -145,11 +151,7 @@ function new_block()   {
     
     for (let i = 0; i < 4; i++) {
         BlockInfo.addr[i][0] = Tetriminos[BlockInfo.type][i][0] + row_shift;
-        if (BlockInfo.type == TETRIS)    {
-            BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1]+shift - 1;
-        } else {
-            BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1]+shift;
-        }
+        BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1] + column_shift;
     }
 
     dump();
@@ -228,26 +230,146 @@ function move_right()   {
     dump();
 }
 
-function dump()    {
-    let row, column;
-    let debug = (new Array(ROW+row_shift)).fill(0);
-    debug.forEach((_, i) => {debug[i] = (new Array(COLUMN)).fill(0);});
+function rotate_clockwise() {
+    let entry;
+    let row_trance, column_trance;
+    let collision = 0;
+    let row_addr = new Array(4);
+    let column_addr = new Array(4);
 
-    for (let i = 0; i < ROW + row_shift; i++)   {
-        for (let j = 0; j < COLUMN; j++)    {
-            debug[i][j] = field[i+2][j+2];
+    //衝突の検査
+    if (BlockInfo.type == TETRIS)   {
+        for (let i = 0; i < 4; i++) {
+            row_addr[i] = BlockInfo.addr[i][1];
+            column_addr[i] = BlockInfo.addr[i][0];
+        }
+
+        if (BlockInfo.rotate == 0 || BlockInfo.rotate == 3) entry = 1;
+        if (BlockInfo.rotate == 1 || BlockInfo.rotate == 2) entry = 2;
+
+        row_trance = BlockInfo.addr[entry][0] - BlockInfo.addr[entry][1];
+        if (BlockInfo.rotate == 0)   {
+            //初期位置の場合
+            column_trance = -row_trance + 1;
+        } else if (BlockInfo.rotate == 2)   {
+            //初期位置から２回転させた場合
+            column_trance = -row_trance - 1;
+        } else  {
+            column_trance = -row_trance;
+        }
+
+        for (let i = 0; i < 4; i++) {
+            row_addr[i] += row_trance;
+            column_addr[i] += column_trance;
+            collision += field[row_addr[i]][column_addr[i]];
+        }
+        BlockInfo.rotate += 1;
+        if (BlockInfo.rotate == 4) BlockInfo.rotate = 0;
+
+    } else  {
+        //テトリミノがTETRIS以外の場合
+        for(let i = 0;i < 4;i++)    {
+            row_addr[i] = BlockInfo.addr[1][0] - BlockInfo.addr[1][1] + BlockInfo.addr[i][1];
+            column_addr[i] = BlockInfo.addr[1][1] + BlockInfo.addr[1][0] - BlockInfo.addr[i][0];
+            collision += field[row_addr[i]][column_addr[i]];
         }
     }
 
-    for (let i = 0; i < 4; i++) {
-        row = BlockInfo.addr[i][0] - row_shift;
-        column = BlockInfo.addr[i][1] - 2;
-        debug[row][column] = BlockInfo.type;
+    //衝突
+    if(collision == 0)  {
+        //アドレスの更新
+        if (BlockInfo.type != SQUARE)    {
+            // SQUAREは回転させない
+            for(let i = 0; i < 4; i++)  {
+                BlockInfo.addr[i][0] = row_addr[i];
+                BlockInfo.addr[i][1] = column_addr[i];
+            }
+        }
+    }
+    dump();
+}
+
+function rotate_counter_clockwise() {
+    let entry;
+    let row_trance, column_trance;
+    let collision = 0;
+    let row_addr = new Array(4);
+    let column_addr = new Array(4);
+
+    //衝突の検査
+    if (BlockInfo.type == TETRIS)   {
+        for (let i = 0; i < 4; i++) {
+            row_addr[i] = BlockInfo.addr[i][1];
+            column_addr[i] = BlockInfo.addr[i][0];
+        }
+
+        if (BlockInfo.rotate == 0 || BlockInfo.rotate == 3) entry = 1;
+        if (BlockInfo.rotate == 1 || BlockInfo.rotate == 2) entry = 2;
+
+        column_trance = BlockInfo.addr[entry][1] - BlockInfo.addr[entry][0];
+
+        if (BlockInfo.rotate == 1)   {
+            //初期位置から1回転させた場合
+            row_trance = -column_trance - 1;
+        } else if (BlockInfo.rotate == 3)   {
+            //初期位置から3回転させた場合
+            row_trance = -column_trance + 1;
+        } else  {
+            row_trance = -column_trance;
+        }
+
+        for (let i = 0; i < 4; i++) {
+            row_addr[i] += row_trance;
+            column_addr[i] += column_trance;
+            collision += field[row_addr[i]][column_addr[i]];
+        }
+        BlockInfo.rotate -= 1;
+        if (BlockInfo.rotate == -1) BlockInfo.rotate = 3;
+
+    } else  {
+        //テトリミノがTETRIS以外の場合
+        for(let i = 0;i < 4;i++)    {
+            row_addr[i] = BlockInfo.addr[1][1] + BlockInfo.addr[1][0] - BlockInfo.addr[i][1];
+            column_addr[i] = BlockInfo.addr[1][1] - BlockInfo.addr[1][0] + BlockInfo.addr[i][0];
+            collision += field[row_addr[i]][column_addr[i]];
+        }
     }
 
-    for (let i = 1; i < ROW+1; i++)   {
-        console.log(debug[i])
+    if(collision == 0)  {
+        //アドレスの更新
+        if (BlockInfo.type != SQUARE)    {
+            // SQUAREは回転させない
+            for(let i = 0; i < 4; i++)  {
+                BlockInfo.addr[i][0] = row_addr[i];
+                BlockInfo.addr[i][1] = column_addr[i];
+            }
+        }
     }
+    dump();
+}
 
-    console.log("");
+function dump()    {
+    if (dump_on)    {
+        let row, column;
+        let debug = (new Array(ROW+row_shift)).fill(0);
+        debug.forEach((_, i) => {debug[i] = (new Array(COLUMN)).fill(0);});
+
+        for (let i = 0; i < ROW + row_shift; i++)   {
+            for (let j = 0; j < COLUMN; j++)    {
+                debug[i][j] = field[i+2][j+2];
+            }
+        }
+
+        for (let i = 0; i < 4; i++) {
+            row = BlockInfo.addr[i][0] - row_shift;
+            column = BlockInfo.addr[i][1] - 2;
+            debug[row][column] = BlockInfo.type;
+        }
+
+        for (let i = 1; i < ROW+1; i++)   {
+            console.log(debug[i])
+        }
+
+        console.log("");
+    }
 }
