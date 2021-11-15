@@ -10,7 +10,7 @@ const L1 = 5;
 const L2 = 6;
 const T = 7;
 
-const ROW = 20;
+const ROW = 10;
 const COLUMN = 10;
 
 const dump_on = true;
@@ -33,16 +33,13 @@ let end = Tetriminos.length;
 
 let sw_power = true;
 
-const row_shift = 1;
-const column_shift = Math.ceil(COLUMN/2) + 1;
-
 //BlockInfoの設定
 let BlockInfo = new Object();
 BlockInfo.type = 0;
 BlockInfo.addr = Tetriminos[EMPTY];
 
 //field setting
-let field = (new Array(ROW + 5)).fill(0);
+let field = (new Array(ROW + 4)).fill(0);
 field.forEach((_, i) => {field[i] = (new Array(COLUMN + 4)).fill(0);});
 
 setting();
@@ -54,9 +51,9 @@ const countUp = () => {
 
     document.addEventListener('keydown', keyevent);
     
-    drop_block();
+    let fixed = drop_block();
 
-    if(count > 30){　
+    if (fixed)   {
         clearTimeout(timeoutId);
     }
 }
@@ -76,9 +73,9 @@ function　shuffle() {
     }
 }
 
-function keyevent(e) {
+function keyevent(event) {
     if (sw_power) {
-        switch (e.key) {
+        switch (event.key) {
             case 'ArrowUp':
                 //console.log('↑');
                 break;
@@ -107,11 +104,10 @@ function keyevent(e) {
 
 function setting()  {
     for(let i = 2; i < COLUMN + 2; i++)    {
-        field[0][i] = 9;
+        field[ROW + 2][i] = 9;
         field[ROW + 3][i] = 9;
-        field[ROW + 4][i] = 9;
     }
-    for(let i = 0; i < ROW + 5; i++)    {
+    for(let i = 0; i < ROW + 4; i++)    {
         field[i][0] = 9;
         field[i][1] = 9;
         field[i][COLUMN + 2] = 9;
@@ -125,12 +121,13 @@ function setting()  {
         randoms[i] = randoms[i+1];
     }
 
-    //最初のブロックを保存
+    //ブロックを保存
+    let shift = Math.ceil(COLUMN/2);
     for (let i = 0; i < 4; i++) {
-        BlockInfo.addr[i][0] = Tetriminos[BlockInfo.type][i][0] + row_shift;
-        BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1] + column_shift;
+        BlockInfo.addr[i][0] = Tetriminos[BlockInfo.type][i][0] + 3;
+        BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1] + shift;
     }
-    dump()
+    dump();
 }
 
 function new_block()   {
@@ -149,9 +146,11 @@ function new_block()   {
         }
     }
     
+    //ブロックを保存
+    let shift = Math.ceil(COLUMN/2);
     for (let i = 0; i < 4; i++) {
-        BlockInfo.addr[i][0] = Tetriminos[BlockInfo.type][i][0] + row_shift;
-        BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1] + column_shift;
+        BlockInfo.addr[i][0] = Tetriminos[BlockInfo.type][i][0] + 3;
+        BlockInfo.addr[i][1] = Tetriminos[BlockInfo.type][i][1] + shift;
     }
 
     dump();
@@ -160,11 +159,7 @@ function new_block()   {
 function drop_block()   {
     let row, column;
     let collision = 0;
-
-    //アドレスの更新
-    for(let i = 0; i < 4; i++)  {
-        BlockInfo.addr[i][0] += 1;
-    }
+    let fixed = false;
 
     //衝突の検査
     for(let i = 0; i < 4; i++)  {
@@ -184,8 +179,16 @@ function drop_block()   {
 
         //BlockInfoの初期化
         new_block();
+        fixed = true;
+    } else {
+        //アドレスの更新
+        for(let i = 0; i < 4; i++)  {
+            BlockInfo.addr[i][0] += 1;
+        }
+        
     }
     dump();
+    return fixed;
 }
 
 function move_left()    {
@@ -351,17 +354,17 @@ function rotate_counter_clockwise() {
 function dump()    {
     if (dump_on)    {
         let row, column;
-        let debug = (new Array(ROW+row_shift)).fill(0);
+        let debug = (new Array(ROW+1)).fill(0);
         debug.forEach((_, i) => {debug[i] = (new Array(COLUMN)).fill(0);});
 
-        for (let i = 0; i < ROW + row_shift; i++)   {
+        for (let i = 0; i < ROW+1; i++)   {
             for (let j = 0; j < COLUMN; j++)    {
-                debug[i][j] = field[i+2][j+2];
+                debug[i][j] = field[i + 1][j + 2];
             }
         }
 
         for (let i = 0; i < 4; i++) {
-            row = BlockInfo.addr[i][0] - row_shift;
+            row = BlockInfo.addr[i][0] - 1;
             column = BlockInfo.addr[i][1] - 2;
             debug[row][column] = BlockInfo.type;
         }
