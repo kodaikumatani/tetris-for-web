@@ -86,9 +86,11 @@ function keyevent(e) {
                 break;
             case 'ArrowLeft':
                 //console.log('←');
+                move_left();
                 break;
             case 'ArrowRight':
                 //console.log('→');
+                move_right();
                 break;
         }
     }
@@ -134,7 +136,6 @@ function new_block()   {
         }
         //draw_next_block(randoms[0]);
     } else {
-        console.log(randoms[0]);
         BlockInfo.type = randoms[0];
         //draw_next_block(randoms[1]);
         for (let i = 0; i < 7; i++) {
@@ -182,6 +183,48 @@ function drop_block()   {
         //BlockInfoの初期化
         new_block();
     }
+    dump();
+}
+
+function move_left()    {
+    let row, column;
+    let collision = 0;
+
+    //衝突の検査
+    for(let i = 0; i < 4; i++)  {
+        row = BlockInfo.addr[i][0];
+        column = BlockInfo.addr[i][1] - 1;
+        collision += field[row][column];
+    }
+
+    if(collision == 0)    {
+        //アドレスを更新
+        for(let i = 0; i < 4; i++)  {
+            BlockInfo.addr[i][1] -= 1;
+        }
+    }
+
+    dump();
+}
+
+function move_right()   {
+    let row, column;
+    let collision = 0;
+
+    //衝突の検査
+    for(let i = 0; i < 4; i++)  {
+        row = BlockInfo.addr[i][0];
+        column = BlockInfo.addr[i][1] + 1;
+        collision += field[row][column];
+    }
+
+    if(collision == 0)    {
+        //アドレスを更新
+        for(let i = 0; i < 4; i++)  {
+            BlockInfo.addr[i][1] += 1;
+        }
+    }
+
     dump();
 }
 
